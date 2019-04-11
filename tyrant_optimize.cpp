@@ -529,7 +529,7 @@ std::string alpha_dominion_cost(const Card* dom_card)
     {
         if (it.first->m_category != CardCategory::dominion_material)
         { continue; }
-        value += it.first->m_name + " x " + std::to_string(it.second) + ", ";
+        value += it.first->m_name + " x " + to_string(it.second) + ", ";
     }
     if (!is_in_recipe(dom_card, owned_alpha_dominion))
     {
@@ -539,7 +539,7 @@ std::string alpha_dominion_cost(const Card* dom_card)
         for (auto& it : refund)
         {
             signed num_under(it.second - (signed)num_cards[it.first]);
-            value += it.first->m_name + " x " + std::to_string(it.second) + "/" + std::to_string(num_under) + ", ";
+            value += it.first->m_name + " x " + to_string(it.second) + "/" + to_string(num_under) + ", ";
         }
     }
     // remove trailing ', ' for non-empty string / replace empty by '(none)'
@@ -817,6 +817,14 @@ FinalResults<long double> compute_score(const EvaluatedResults& results, std::ve
 
         auto lower_bound = boost::math::binomial_distribution<>::find_lower_bound_on_p(trials, successes, prob) * max_possible;
         auto upper_bound = boost::math::binomial_distribution<>::find_upper_bound_on_p(trials, successes, prob) * max_possible;
+
+        /* SGnn's changes. Try to merge those if things blow up again.
+        auto successes = std::min((long double) results.second, results.first[index].points / max_possible);
+        auto lower_bound = boost::math::binomial_distribution<>::find_lower_bound_on_p(results.second, successes, 1 - confidence_level) * max_possible;
+        // std::cout << std::endl << "First: " << std::endl << results.second << std::endl << results.first[index].points / max_possible << std::endl << std::endl;
+        auto upper_bound = boost::math::binomial_distribution<>::find_upper_bound_on_p(results.second, successes, 1 - confidence_level) * max_possible;
+        ** End of SGnn's changes */
+
         if (use_harmonic_mean)
         {
             final.points += factors[index] / results.first[index].points;
@@ -1271,6 +1279,12 @@ void thread_evaluate(boost::barrier& main_barrier,
 
                     // Get a loose (better than no) upper bound. TODO: Improve it.
                     compare_stop = (boost::math::binomial_distribution<>::find_upper_bound_on_p(trials, successes, prob) * max_possible <
+
+                    /* SGnn's changes. Try to merge if things blow up again.
+                    // std::cout << std::endl << "Snd: " << std::endl << thread_total_local << std::endl << score_accum / max_possible << std::endl << std::endl;
+                    compare_stop = (boost::math::binomial_distribution<>::find_upper_bound_on_p(thread_total_local, std::min((long double) thread_total_local, score_accum / max_possible), 1 - confidence_level) * max_possible <
+                    ** End of SGnn's changes */
+
                             thread_best_results->points + min_increment_of_score);
                     if (compare_stop)
                     {
@@ -2008,8 +2022,8 @@ FinalResults<long double> hill_climbing(unsigned num_min_iterations, unsigned nu
         }
         else if (from_slot == dead_slot || best_score.points - target_score > -1e-9)
         {
-            if (best_score.n_sims >= num_iterations || best_gap > 0)
-            { break; }
+	    if (best_score.n_sims >= num_iterations || best_gap > 0)
+	    { break; }
             auto & prev_results = evaluated_decks[best_deck];
             skipped_simulations += prev_results.second;
             // Re-evaluate the best deck
@@ -2020,7 +2034,6 @@ FinalResults<long double> hill_climbing(unsigned num_min_iterations, unsigned nu
             best_score = compute_score(evaluate_result, proc.factors);
             std::cout << "Results refined: ";
             print_score_info(evaluate_result, proc.factors);
-            dead_slot = from_slot;
         }
         if (best_score.points - target_score > -1e-9)
         { continue; }
@@ -3124,14 +3137,14 @@ FinalResults<long double> run(int argc, char** argv)
         }
         else if (strcmp(argv[argIndex], "prefered-factor") == 0)
         {
-            if(check_input_amount(argc,argv,argIndex,1))exit(1);
-            prefered_factor= std::stoi(argv[argIndex + 1]);
+	    if(check_input_amount(argc,argv,argIndex,1))exit(1);
+            prefered_factor= strtol(argv[argIndex + 1], 0, 10);
             argIndex += 1;
         }
         else if (strcmp(argv[argIndex], "recent-percent") == 0)
         {
-            if(check_input_amount(argc,argv,argIndex,1))exit(1);
-            recent_percent= std::stoi(argv[argIndex + 1]);
+	    if(check_input_amount(argc,argv,argIndex,1))exit(1);
+            recent_percent= strtol(argv[argIndex + 1], 0, 10);
             argIndex += 1;
         }
         else if (strcmp(argv[argIndex], "effect") == 0 || strcmp(argv[argIndex], "-e") == 0)
@@ -3392,8 +3405,8 @@ FinalResults<long double> run(int argc, char** argv)
         }
         else if (strcmp(argv[argIndex], "yfpool") == 0 || strcmp(argv[argIndex], "yfortpool") == 0)  // set forts
         {
-            if(check_input_amount(argc,argv,argIndex,1))exit(1);
-            yfpool = std::stoi(argv[argIndex + 1]);
+	    if(check_input_amount(argc,argv,argIndex,1))exit(1);
+            yfpool = strtol(argv[argIndex + 1], 0, 10);
             argIndex += 1;
         }
         else if (strcmp(argv[argIndex], "ef") == 0 || strcmp(argv[argIndex], "efort") == 0)  // set enemies' forts
@@ -3404,8 +3417,8 @@ FinalResults<long double> run(int argc, char** argv)
         }
         else if (strcmp(argv[argIndex], "efpool") == 0 || strcmp(argv[argIndex], "efortpool") == 0)  // set forts
         {
-            if(check_input_amount(argc,argv,argIndex,1))exit(1);
-            efpool = std::stoi(argv[argIndex + 1]);
+	    if(check_input_amount(argc,argv,argIndex,1))exit(1);
+            efpool = strtol(argv[argIndex + 1], 0, 10);
             argIndex += 1;
         }
         else if (strcmp(argv[argIndex], "yd") == 0 || strcmp(argv[argIndex], "ydom") == 0)  // set dominions
@@ -3457,8 +3470,10 @@ FinalResults<long double> run(int argc, char** argv)
         {
             if(check_input_amount(argc,argv,argIndex,3))exit(1);
             opt_todo.push_back(std::make_tuple((unsigned)atoi(argv[argIndex + 1]), (unsigned)atoi(argv[argIndex + 1]), anneal));
-            temperature = std::stod(argv[argIndex+2]);
-            coolingRate = std::stod(argv[argIndex+3]);
+            //temperature = std::stod(argv[argIndex+2]);
+            //coolingRate = std::stod(argv[argIndex+3]);
+	    temperature = std::strtod(argv[argIndex+2], NULL);
+	    coolingRate = std::strtod(argv[argIndex+3], NULL);
             if (std::get<1>(opt_todo.back()) < 10) { opt_num_threads = 1; }
             opt_do_optimization = true;
             opt_multi_optimization = true;
@@ -3476,21 +3491,26 @@ FinalResults<long double> run(int argc, char** argv)
         else if (strcmp(argv[argIndex], "genetic-pool") == 0)
         {
             if(check_input_amount(argc,argv,argIndex,1))exit(1);
-            pool_size = std::stod(argv[argIndex+1]);
+            //pool_size = std::stod(argv[argIndex+1]);
+            pool_size = std::strtod(argv[argIndex+1], NULL);
             argIndex += 1;
         }
         else if (strcmp(argv[argIndex], "genetic-gen") == 0)
         {
             if(check_input_amount(argc,argv,argIndex,1))exit(1);
-            generations = std::stod(argv[argIndex+1]);
+            //generations = std::stod(argv[argIndex+1]);
+            generations = std::strtod(argv[argIndex+1], NULL);
             argIndex += 1;
         }
         else if (strcmp(argv[argIndex], "genetic-opts") == 0)
         {
             if(check_input_amount(argc,argv,argIndex,3))exit(1);
-            opt_pool_keep = std::stod(argv[argIndex+1]);
-            opt_pool_cross = std::stod(argv[argIndex+2]);
-            opt_pool_mutate = std::stod(argv[argIndex+3]);
+            //opt_pool_keep = std::stod(argv[argIndex+1]);
+            opt_pool_keep = std::strtod(argv[argIndex+1], NULL);
+            //opt_pool_cross = std::stod(argv[argIndex+2]);
+            opt_pool_cross = std::strtod(argv[argIndex+2], NULL);
+            //opt_pool_mutate = std::stod(argv[argIndex+3]);
+            opt_pool_mutate = std::strtod(argv[argIndex+3], NULL);
             argIndex += 3;
         }
         else if (strcmp(argv[argIndex], "reorder") == 0)
@@ -3520,12 +3540,12 @@ FinalResults<long double> run(int argc, char** argv)
                 if ((opt_name == "iter-mul") or (opt_name == "iterations-multiplier"))
                 {
                     ensure_opt_value(has_value, opt_name);
-                    iterations_multiplier = std::stoi(opt_value);
+                    iterations_multiplier = atoi(opt_value.c_str());
                 }
                 else if ((opt_name == "egc") or (opt_name == "endgame-commander") or (opt_name == "min-commander-fusion-level"))
                 {
                     ensure_opt_value(has_value, opt_name);
-                    use_fused_commander_level = std::stoi(opt_value);
+                    use_fused_commander_level = atoi(opt_value.c_str());
                 }
                 else if (opt_name == "use-all-commander-levels")
                 {
@@ -3542,12 +3562,12 @@ FinalResults<long double> run(int argc, char** argv)
                 else if ((opt_name == "recent-boost-times") or (opt_name == "rbt")) //prefer new cards in hill climb and break climb loop faster
                 {
                     ensure_opt_value(has_value, opt_name);
-                    prefered_factor = std::stoi(opt_value);
+                    prefered_factor = strtol(opt_value.c_str(), 0, 10);
                 }
                 else if ((opt_name == "recent-boost-percent") or (opt_name == "rbp")) //prefer new cards in hill climb and break climb loop faster
                 {
                     ensure_opt_value(has_value, opt_name);
-                    recent_percent = std::stoi(opt_value);
+                    recent_percent = strtol(opt_value.c_str(), 0, 10);
                 }
                 else if ((opt_name == "otd") or (opt_name == "open-the-deck"))
                 {
@@ -3645,22 +3665,25 @@ FinalResults<long double> run(int argc, char** argv)
                 {
                     owned_alpha_dominion = owned_card;
                 }
+                /*
                 else
                 {
-                    /*std::cerr << "Warning: ownedcards already contains alpha dominion (" << owned_alpha_dominion->m_name
+                    std::cerr << "Warning: ownedcards already contains alpha dominion (" << owned_alpha_dominion->m_name
                       << "): removing additional " << owned_card->m_name << std::endl;
-                      need_remove = true;*/
+                      need_remove = true;
                 }
+                */
             }
             if (need_remove) { owned_it = _owned_cards.erase(owned_it); }
             else { ++owned_it; }
         }
         if (!owned_alpha_dominion && use_owned_dominions)
         {
-            //owned_alpha_dominion = all_cards.by_id(50002);
-            //std::cerr << "Warning: dominion climbing enabled and no alpha dominion found in owned cards, adding default "
-            //    << owned_alpha_dominion->m_name << std::endl;
+            owned_alpha_dominion = all_cards.by_id(50002);
+            std::cerr << "Warning: dominion climbing enabled and no alpha dominion found in owned cards, adding default "
+                << owned_alpha_dominion->m_name << std::endl;
         }
+        /**/
         if (owned_alpha_dominion)
         { _owned_cards[owned_alpha_dominion->m_id] = 1; }
 
@@ -4291,9 +4314,9 @@ FinalResults<long double> run(int argc, char** argv)
 #ifndef TEST
 int main(int argc,char** argv)
 {
-#ifndef NTIMER
-    boost::timer::auto_cpu_timer t;
-#endif
+//#ifndef NTIMER
+//    boost::timer::auto_cpu_timer t;
+//#endif
     start_time = std::chrono::system_clock::now();
     if (argc == 2 && strcmp(argv[1], "-version") == 0)
     {

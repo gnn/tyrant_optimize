@@ -533,7 +533,7 @@ void Deck::show_upgrades(std::stringstream &ios, const Card* card, unsigned card
     double q = 1.0 - p;
     unsigned n = card_max_level - card->m_level;
     unsigned m = 0;
-    double prob = 100.0 * pow(q, n);
+    double prob = 100.0 * std::pow(q, n);
     ios << leading_chars << std::fixed << std::setprecision(2) << std::setw(5) << prob << "% no up\n";
     while (card->m_level != card_max_level)
     {

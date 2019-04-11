@@ -46,3 +46,38 @@ constantine+: Elder Constantine
 constantine++: Councilor Constantine
 arkadios+: Arkadios Ultra
 arkadios++: Arkadios Ultimate
+
+// Custom
+AA: Agile Airship
+AM: Amon Matrix
+AWD: Atomic Wardriver
+BT: Blast Twin
+DB: Deserted Baughe
+DE: Daedalus Enraged
+DH: Dreamhaunter
+DR: Dune Runner
+StC: Silus the Corrupt
+VE: Vile Emergence
+JD: Lt. Col. Jane Duke
+VS: Vizier Shurixin
+EB: Extreme Barrager
+SG: Stonewall Garrison
+IR: Inquisitor's Rule
+GV: Grizzled Veteran
+OA: Ozone Aggressor
+PB: Plague Belcher
+ML: Mangle Loader
+SD: Sinuous Dam
+FS: Frontier Sanctum
+WtL: Wurklobe the Lurid
+VA: Vrost's Alcazar
+NM: Nettle Miscreant
+VV: Vincentius Vanquish
+RR: Rumbler Rickshaw
+IoH: Inheritor of Hope
+PTs: Patriarch's Bidding
+MA: Myrvern Architect
+RC: Riptide Capsizer
+SS: Starved Scamper
+TtM: Typhon the Mad
+
