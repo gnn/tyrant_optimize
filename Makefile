@@ -49,3 +49,16 @@ release: ahk release-noahk
 
 pull: commit
 		git pull
+
+# A custom target for downloading XML files.
+XML := "fusion_recipes_cj2.xml" "missions.xml" "skills_set.xml"
+
+xml:
+	for F in $(XML); do\
+	  wget -O "data/$$F" "http://mobile.tyrantonline.com/assets/$$F";\
+  done;
+
+	  for F in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19; do\
+	  wget -O "data/cards_section_$$F.xml" \
+		  "http://mobile.tyrantonline.com/assets/cards_section_$$F.xml";\
+  done;
