@@ -17,6 +17,9 @@ endif
 ifeq ($(detected_OS),Linux)  # Mac OS X
     OS =linux
 endif
+ifeq ($(detected_OS),SunOS)
+    OS =linux
+endif
 main:
 		$(MAKE) -f make/Makefile.${OS} all
 
